@@ -1,4 +1,4 @@
-package br.com.algaworks.comercial.controller;
+package br.com.algaworks.comercial.resource;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +22,7 @@ import br.com.algaworks.comercial.repository.Oportunidades;
 
 @RestController
 @RequestMapping("/oportunidades")
-public class OportunidadeController {
+public class OportunidadeResource {
 
 	@Autowired
 	private Oportunidades oportunidades;
