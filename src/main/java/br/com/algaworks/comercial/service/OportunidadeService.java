@@ -32,23 +32,33 @@ public class OportunidadeService {
 	public Oportunidade editar(Oportunidade oportunidade)
 			throws OportunidadeJaExisteComMesmoProspectoEDescricaoException, OportunidadeNaoExisteException {
 
-		if (oportunidade.getId() == null) {
-			throw new IllegalArgumentException("Id é obrigatório");
+		Optional<Oportunidade> oportunidadeExistente = buscaPorId(oportunidade.getId());
+
+		oportunidadeExistente = oportunidadeRepository.findByDescricaoAndNomeProspecto(oportunidade.getDescricao(),
+				oportunidade.getNomeProspecto());
+
+		if (oportunidadeExistente.isPresent() && !oportunidadeExistente.get().equals(oportunidade)) {
+			throw new OportunidadeJaExisteComMesmoProspectoEDescricaoException();
+		} else {
+			return oportunidadeRepository.save(oportunidade);
 		}
-		Optional<Oportunidade> oportunidadeExistente = oportunidadeRepository.findById(oportunidade.getId());
+	}
+
+	public void deletar(Long id) throws OportunidadeNaoExisteException {
+		Optional<Oportunidade> oportunidadeExistente = buscaPorId(id);
 
 		if (oportunidadeExistente.isPresent()) {
-			oportunidadeExistente = oportunidadeRepository.findByDescricaoAndNomeProspecto(oportunidade.getDescricao(),
-					oportunidade.getNomeProspecto());
+			oportunidadeRepository.deleteById(id);
+		} else {
+			throw new OportunidadeNaoExisteException();
+		}
+	}
 
-			if (oportunidadeExistente.isPresent() && !oportunidadeExistente.get().equals(oportunidade)) {
-				throw new OportunidadeJaExisteComMesmoProspectoEDescricaoException();
-			} else {
-				return oportunidadeRepository.save(oportunidade);
-			}
+	public Optional<Oportunidade> buscaPorId(Long id) {
+		if (id == null) {
+			throw new IllegalArgumentException("Id é obrigatório");
 		}
 
-		throw new OportunidadeNaoExisteException();
-
+		return oportunidadeRepository.findById(id);
 	}
 }

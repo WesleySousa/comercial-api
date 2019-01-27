@@ -8,6 +8,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,13 +41,15 @@ public class OportunidadeResource {
 
 	@GetMapping("/{id}")
 	public ResponseEntity<Oportunidade> buscar(@PathVariable Long id) {
-		Optional<Oportunidade> oportunidade = oportunidadeRepository.findById(id);
-
-		if (oportunidade.isPresent()) {
-			return ResponseEntity.ok(oportunidade.get());
+		try {
+			Optional<Oportunidade> oportunidade = oportunidadeService.buscaPorId(id);
+			if (oportunidade.isPresent()) {
+				return ResponseEntity.ok(oportunidade.get());
+			}
+			return ResponseEntity.notFound().build();
+		} catch (IllegalArgumentException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
-
-		return ResponseEntity.notFound().build();
 	}
 
 	@PostMapping
@@ -69,4 +72,16 @@ public class OportunidadeResource {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
 		}
 	}
+	
+	@DeleteMapping("/{id}")
+	public void deletar(@PathVariable Long id) {
+		try {
+			oportunidadeService.deletar(id);
+		} catch (IllegalArgumentException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+		} catch (OportunidadeNaoExisteException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+		}
+	}
+
 }
